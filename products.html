@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - F1 Store</title>
+    <meta name="description" content="Browse our complete collection of Formula 1 merchandise, jerseys, and apparel.">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎️</text></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1 class="logo"><a href="index.html" style="color: inherit; text-decoration: none;">F1 STORE</a></h1>
+            </div>
+            <nav class="nav">
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html" class="active">Products</a></li>
+                    <li><a href="#" onclick="showTeams()">Teams</a></li>
+                    <li><a href="#" onclick="showDrivers()">Drivers</a></li>
+                </ul>
+            </nav>
+            <div class="nav-actions">
+                <div class="search-box">
+                    <input type="text" placeholder="Search products..." id="searchInput">
+                    <button onclick="searchProducts()">🔍</button>
+                </div>
+                <div class="user-menu">
+                    <button onclick="toggleUserMenu()" id="userBtn">👤</button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="login.html">Sign In</a>
+                        <a href="signup.html">Sign Up</a>
+                        <a href="#" onclick="showOrders()">My Orders</a>
+                    </div>
+                </div>
+                <div class="cart-icon" onclick="openCart()">
+                    🛒 <span class="cart-count" id="cartCount">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Products Page Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Page Header -->
+            <section class="page-header">
+                <h1 class="page-title">F1 MERCHANDISE</h1>
+                <p class="page-subtitle">Discover our complete collection of official Formula 1 products</p>
+            </section>
+
+            <!-- Filters and Sort -->
+            <section class="products-controls">
+                <div class="filters-section">
+                    <h3>Filter by Category:</h3>
+                    <div class="category-filters" id="categoryFilters">
+                        <!-- Filters loaded by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="sort-section">
+                    <label for="sortSelect">Sort by:</label>
+                    <select id="sortSelect" class="sort-select">
+                        <option value="default">Default</option>
+                        <option value="name">Name A-Z</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="rating">Highest Rated</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Products Grid -->
+            <section class="products-section">
+                <div class="products-grid" id="productsContainer">
+                    <!-- Products loaded by JavaScript -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>F1 STORE</h3>
+                    <p>Official Formula 1 merchandise and apparel</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="products.html">Products</a></li>
+                        <li><a href="#" onclick="showTeams()">Teams</a></li>
+                        <li><a href="#" onclick="showDrivers()">Drivers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Customer Service</h4>
+                    <ul>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="#">Returns</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 F1 Store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script src="products.js"></script>
+    <script src="script.js"></script>
+    
+    <style>
+        /* Products Page Specific Styles */
+        .main-content {
+            min-height: 80vh;
+            padding: 2rem 0;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .page-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--f1-black);
+            margin-bottom: 1rem;
+        }
+        
+        .page-subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+        
+        .products-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 3rem;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .filters-section h3 {
+            margin-bottom: 1rem;
+            color: var(--f1-black);
+            font-weight: 600;
+        }
+        
+        .category-filters {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            background: var(--f1-white);
+            border: 2px solid var(--f1-black);
+            color: var(--f1-black);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--f1-red);
+            border-color: var(--f1-red);
+            color: var(--f1-white);
+        }
+        
+        .sort-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .sort-section label {
+            font-weight: 600;
+            color: var(--f1-black);
+            white-space: nowrap;
+        }
+        
+        .sort-select {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--f1-black);
+            border-radius: 8px;
+            background: var(--f1-white);
+            color: var(--f1-black);
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .sort-select:focus {
+            outline: none;
+            border-color: var(--f1-red);
+        }
+        
+        .products-section {
+            margin-bottom: 4rem;
+        }
+        
+        .no-products {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #666;
+            font-size: 1.2rem;
+        }
+        
+        .nav-links .active {
+            color: var(--f1-red);
+        }
+        
+        .nav-links .active::after {
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2.5rem;
+            }
+            
+            .products-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .sort-section {
+                justify-content: space-between;
+            }
+            
+            .category-filters {
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .filter-btn {
+                font-size: 0.9rem;
+                padding: 0.4rem 0.8rem;
+            }
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - F1 Store</title>
+    <meta name="description" content="View your F1 Store order history and track your purchases.">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎️</text></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1 class="logo"><a href="index.html" style="color: inherit; text-decoration: none;">F1 STORE</a></h1>
+            </div>
+            <nav class="nav">
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="#" onclick="showTeams()">Teams</a></li>
+                    <li><a href="#" onclick="showDrivers()">Drivers</a></li>
+                </ul>
+            </nav>
+            <div class="nav-actions">
+                <div class="search-box">
+                    <input type="text" placeholder="Search products..." id="searchInput">
+                    <button onclick="searchProducts()">🔍</button>
+                </div>
+                <div class="user-menu">
+                    <button onclick="toggleUserMenu()" id="userBtn">👤</button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="login.html">Sign In</a>
+                        <a href="signup.html">Sign Up</a>
+                        <a href="orders.html">My Orders</a>
+                    </div>
+                </div>
+                <div class="cart-icon" onclick="openCart()">
+                    🛒 <span class="cart-count" id="cartCount">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Orders Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="orders-header">
+                <h1 class="page-title">MY ORDERS</h1>
+                <p class="page-subtitle">Track your F1 merchandise orders</p>
+            </div>
+
+            <div class="orders-container" id="ordersContainer">
+                <!-- Orders loaded by JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>F1 STORE</h3>
+                    <p>Official Formula 1 merchandise and apparel</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="products.html">Products</a></li>
+                        <li><a href="#" onclick="showTeams()">Teams</a></li>
+                        <li><a href="#" onclick="showDrivers()">Drivers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Customer Service</h4>
+                    <ul>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="#">Returns</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 F1 Store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script src="products.js"></script>
+    <script src="script.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!currentUser) {
+                showNotification('Please sign in to view orders', 'error');
+                window.location.href = 'login.html?return=orders.html';
+                return;
+            }
+            loadUserOrders();
+        });
+
+        function loadUserOrders() {
+            const container = document.getElementById('ordersContainer');
+            const userOrders = getUserOrders();
+
+            if (userOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-orders">
+                        <h3>No Orders Yet</h3>
+                        <p>You haven't placed any orders yet. Start shopping for F1 merchandise!</p>
+                        <button class="btn" onclick="location.href='products.html'">Shop Now</button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = userOrders.map(order => `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-info">
+                            <h3>Order #${order.id}</h3>
+                            <p class="order-date">${formatDate(order.createdAt)}</p>
+                        </div>
+                        <div class="order-status">
+                            <span class="status-badge ${order.status}">${order.status.toUpperCase()}</span>
+                            <div class="order-total">${formatPrice(order.total)}</div>
+                        </div>
+                    </div>
+                    <div class="order-items">
+                        ${order.items.map(item => `
+                            <div class="order-item">
+                                <div class="item-image">${item.image}</div>
+                                <div class="item-details">
+                                    <div class="item-name">${item.name}</div>
+                                    <div class="item-options">
+                                        ${item.selectedSize ? `Size: ${item.selectedSize}` : ''}
+                                        ${item.selectedColor ? ` | Color: ${item.selectedColor}` : ''}
+                                    </div>
+                                    <div class="item-quantity">Qty: ${item.quantity}</div>
+                                </div>
+                                <div class="item-price">${formatPrice(item.price * item.quantity)}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="order-actions">
+                        <button class="btn btn-secondary" onclick="trackOrder(${order.id})">Track Order</button>
+                        <button class="btn" onclick="reorderItems(${order.id})">Reorder</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function trackOrder(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const trackingInfo = `
+Order #${order.id}
+Status: ${order.status.toUpperCase()}
+Order Date: ${formatDate(order.createdAt)}
+Total: ${formatPrice(order.total)}
+
+Tracking Information:
+✓ Order Confirmed - ${formatDate(order.createdAt)}
+${order.status === 'confirmed' ? '📦 Processing - Expected to ship within 2-3 business days' : ''}
+${order.status === 'shipped' ? '🚚 Shipped - Expected delivery in 3-5 business days' : ''}
+${order.status === 'delivered' ? '✅ Delivered' : ''}
+            `;
+
+            alert(trackingInfo);
+        }
+
+        function reorderItems(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            order.items.forEach(item => {
+                addToCart(item.id, item.quantity, item.selectedSize, item.selectedColor);
+            });
+
+            showNotification('Items added to cart!', 'success');
+        }
+    </script>
+    
+    <style>
+        .main-content {
+            min-height: 80vh;
+            padding: 2rem 0;
+        }
+
+        .orders-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--f1-black);
+            margin-bottom: 1rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .orders-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .order-card {
+            background: var(--f1-white);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .order-info h3 {
+            font-family: 'Orbitron', monospace;
+            color: var(--f1-black);
+            margin-bottom: 0.5rem;
+        }
+
+        .order-date {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .order-status {
+            text-align: right;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .status-badge.confirmed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.shipped {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-badge.delivered {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .order-total {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--f1-red);
+        }
+
+        .order-items {
+            padding: 1.5rem;
+        }
+
+        .order-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-image {
+            width: 60px;
+            height: 60px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .item-options {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+
+        .item-quantity {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .item-price {
+            font-weight: 700;
+            color: var(--f1-red);
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .empty-orders {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--f1-white);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .empty-orders h3 {
+            font-family: 'Orbitron', monospace;
+            color: var(--f1-black);
+            margin-bottom: 1rem;
+        }
+
+        .empty-orders p {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2.5rem;
+            }
+
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .order-status {
+                text-align: left;
+            }
+
+            .order-actions {
+                flex-direction: column;
+            }
+
+            .order-item {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: center;
+            }
+
+            .item-image {
+                align-self: center;
+            }
+        }
+    </style>
+</body>
+</html>

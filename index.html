@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1 Store - Official Formula 1 Merchandise</title>
+    <meta name="description" content="Shop official Formula 1 jerseys, apparel and merchandise. Premium F1 team gear and driver collections.">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎️</text></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1 class="logo">F1 STORE</h1>
+            </div>
+            <nav class="nav">
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="#" onclick="showTeams()">Teams</a></li>
+                    <li><a href="#" onclick="showDrivers()">Drivers</a></li>
+                </ul>
+            </nav>
+            <div class="nav-actions">
+                <div class="search-box">
+                    <input type="text" placeholder="Search products..." id="searchInput">
+                    <button onclick="searchProducts()">🔍</button>
+                </div>
+                <div class="user-menu">
+                    <button onclick="toggleUserMenu()" id="userBtn">👤</button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="login.html">Sign In</a>
+                        <a href="signup.html">Sign Up</a>
+                        <a href="#" onclick="showOrders()">My Orders</a>
+                    </div>
+                </div>
+                <div class="cart-icon" onclick="openCart()">
+                    🛒 <span class="cart-count" id="cartCount">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">OFFICIAL F1 MERCHANDISE</h1>
+            <p class="hero-subtitle">Premium Formula 1 Jerseys & Apparel</p>
+            <button class="cta-btn" onclick="location.href='products.html'">SHOP NOW</button>
+        </div>
+        <div class="hero-banner">
+            <div class="banner-slide active">
+                <div class="banner-content">
+                    <h2>NEW SEASON COLLECTION</h2>
+                    <p>Get the latest 2024 team jerseys</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Categories -->
+    <section class="categories">
+        <div class="container">
+            <h2 class="section-title">SHOP BY CATEGORY</h2>
+            <div class="category-grid">
+                <div class="category-card" onclick="filterProducts('jerseys')">
+                    <div class="category-icon">👕</div>
+                    <h3>Jerseys</h3>
+                </div>
+                <div class="category-card" onclick="filterProducts('caps')">
+                    <div class="category-icon">🧢</div>
+                    <h3>Caps</h3>
+                </div>
+                <div class="category-card" onclick="filterProducts('accessories')">
+                    <div class="category-icon">⌚</div>
+                    <h3>Accessories</h3>
+                </div>
+                <div class="category-card" onclick="filterProducts('collectibles')">
+                    <div class="category-icon">🏆</div>
+                    <h3>Collectibles</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="featured-products">
+        <div class="container">
+            <h2 class="section-title">FEATURED PRODUCTS</h2>
+            <div class="products-grid" id="featuredProducts">
+                <!-- Products loaded by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Teams Section -->
+    <section class="teams">
+        <div class="container">
+            <h2 class="section-title">F1 TEAMS</h2>
+            <div class="teams-grid">
+                <div class="team-card" onclick="filterByTeam('red-bull')">
+                    <div class="team-logo">🏎️</div>
+                    <h3>Red Bull Racing</h3>
+                </div>
+                <div class="team-card" onclick="filterByTeam('ferrari')">
+                    <div class="team-logo">🐎</div>
+                    <h3>Ferrari</h3>
+                </div>
+                <div class="team-card" onclick="filterByTeam('mercedes')">
+                    <div class="team-logo">⭐</div>
+                    <h3>Mercedes</h3>
+                </div>
+                <div class="team-card" onclick="filterByTeam('mclaren')">
+                    <div class="team-logo">🧡</div>
+                    <h3>McLaren</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>F1 STORE</h3>
+                    <p>Official Formula 1 merchandise and apparel</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="products.html">Products</a></li>
+                        <li><a href="#" onclick="showTeams()">Teams</a></li>
+                        <li><a href="#" onclick="showDrivers()">Drivers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Customer Service</h4>
+                    <ul>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="#">Returns</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 F1 Store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script src="products.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

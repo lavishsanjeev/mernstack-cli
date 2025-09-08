@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sign-In Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .signin-section {
+            margin-bottom: 2rem;
+        }
+
+        .profile-section {
+            display: none;
+            padding: 2rem 0;
+        }
+
+        .profile-section.show {
+            display: block;
+        }
+
+        .profile-picture {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            border: 4px solid #4285f4;
+        }
+
+        .profile-info {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        .profile-info h3 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-info p {
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .signout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+
+        .signout-btn:hover {
+            background: #c82333;
+        }
+
+        /* Google button container styling */
+        #g_id_signin {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Google Sign-In Demo</h1>
+        
+        <!-- Sign-in Section -->
+        <div class="signin-section" id="signinSection">
+            <p>Click the button below to sign in with your Google account:</p>
+            
+            <!-- Google Sign-In Button (rendered by Google Identity Services) -->
+            <div id="g_id_signin"></div>
+        </div>
+
+        <!-- Profile Section (hidden initially) -->
+        <div class="profile-section" id="profileSection">
+            <img id="profilePicture" class="profile-picture" src="" alt="Profile Picture">
+            
+            <div class="profile-info">
+                <h3 id="profileName">Loading...</h3>
+                <p><strong>Email:</strong> <span id="profileEmail">Loading...</span></p>
+                <p><strong>Google ID:</strong> <span id="profileId">Loading...</span></p>
+            </div>
+            
+            <button class="signout-btn" onclick="signOut()">Sign Out</button>
+        </div>
+    </div>
+
+    <!-- Google Identity Services Script -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <script>
+        // Global variables to store user data
+        let currentUser = null;
+
+        // Initialize Google Sign-In when the page loads
+        window.onload = function() {
+            // Initialize Google Identity Services
+            google.accounts.id.initialize({
+                client_id: '1026746797800-9kcql648ej1gkq8c538g4g6o0q3i0120.apps.googleusercontent.com',
+                callback: handleCredentialResponse,
+                auto_select: false,
+                cancel_on_tap_outside: true
+            });
+
+            // Render the Google Sign-In button
+            google.accounts.id.renderButton(
+                document.getElementById('g_id_signin'),
+                {
+                    theme: 'outline',
+                    size: 'large',
+                    type: 'standard',
+                    shape: 'rectangular',
+                    text: 'signin_with',
+                    logo_alignment: 'left'
+                }
+            );
+
+            // Prompt for One Tap sign-in (optional)
+            google.accounts.id.prompt();
+        };
+
+        // Handle the credential response from Google
+        function handleCredentialResponse(response) {
+            console.log('Encoded JWT ID token: ' + response.credential);
+            
+            // Decode the JWT token to get user information
+            const userInfo = parseJwt(response.credential);
+            console.log('Decoded user info:', userInfo);
+            
+            // Store user data
+            currentUser = {
+                id: userInfo.sub,
+                name: userInfo.name,
+                email: userInfo.email,
+                picture: userInfo.picture,
+                given_name: userInfo.given_name,
+                family_name: userInfo.family_name
+            };
+            
+            // Display user profile
+            displayUserProfile(currentUser);
+        }
+
+        // Function to decode JWT token (client-side decoding)
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                
+                return JSON.parse(jsonPayload);
+            } catch (error) {
+                console.error('Error parsing JWT:', error);
+                return null;
+            }
+        }
+
+        // Display user profile information
+        function displayUserProfile(user) {
+            // Hide sign-in section
+            document.getElementById('signinSection').style.display = 'none';
+            
+            // Show profile section
+            document.getElementById('profileSection').classList.add('show');
+            
+            // Populate profile information
+            document.getElementById('profilePicture').src = user.picture;
+            document.getElementById('profileName').textContent = user.name;
+            document.getElementById('profileEmail').textContent = user.email;
+            document.getElementById('profileId').textContent = user.id;
+            
+            console.log('User signed in successfully:', user);
+        }
+
+        // Sign out function
+        function signOut() {
+            // Sign out from Google
+            google.accounts.id.disableAutoSelect();
+            
+            // Clear user data
+            currentUser = null;
+            
+            // Show sign-in section
+            document.getElementById('signinSection').style.display = 'block';
+            
+            // Hide profile section
+            document.getElementById('profileSection').classList.remove('show');
+            
+            console.log('User signed out');
+            
+            // Re-render the Google Sign-In button
+            google.accounts.id.renderButton(
+                document.getElementById('g_id_signin'),
+                {
+                    theme: 'outline',
+                    size: 'large',
+                    type: 'standard',
+                    shape: 'rectangular',
+                    text: 'signin_with',
+                    logo_alignment: 'left'
+                }
+            );
+        }
+
+        // Optional: Handle errors
+        window.addEventListener('error', function(e) {
+            console.error('JavaScript error:', e.error);
+        });
+    </script>
+</body>
+</html>

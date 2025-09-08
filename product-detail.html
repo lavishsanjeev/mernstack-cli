@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - F1 Store</title>
+    <meta name="description" content="View detailed information about F1 merchandise and add to cart.">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎️</text></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1 class="logo"><a href="index.html" style="color: inherit; text-decoration: none;">F1 STORE</a></h1>
+            </div>
+            <nav class="nav">
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="#" onclick="showTeams()">Teams</a></li>
+                    <li><a href="#" onclick="showDrivers()">Drivers</a></li>
+                </ul>
+            </nav>
+            <div class="nav-actions">
+                <div class="search-box">
+                    <input type="text" placeholder="Search products..." id="searchInput">
+                    <button onclick="searchProducts()">🔍</button>
+                </div>
+                <div class="user-menu">
+                    <button onclick="toggleUserMenu()" id="userBtn">👤</button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="login.html">Sign In</a>
+                        <a href="signup.html">Sign Up</a>
+                        <a href="#" onclick="showOrders()">My Orders</a>
+                    </div>
+                </div>
+                <div class="cart-icon" onclick="openCart()">
+                    🛒 <span class="cart-count" id="cartCount">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <div class="container">
+            <a href="index.html">Home</a> > 
+            <a href="products.html">Products</a> > 
+            <span id="productBreadcrumb">Product Details</span>
+        </div>
+    </nav>
+
+    <!-- Product Detail Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="product-detail" id="productDetailContainer">
+                <!-- Product details loaded by JavaScript -->
+            </div>
+            
+            <!-- Related Products -->
+            <section class="related-products">
+                <h2 class="section-title">RELATED PRODUCTS</h2>
+                <div class="products-grid" id="relatedProducts">
+                    <!-- Related products loaded by JavaScript -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>F1 STORE</h3>
+                    <p>Official Formula 1 merchandise and apparel</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="products.html">Products</a></li>
+                        <li><a href="#" onclick="showTeams()">Teams</a></li>
+                        <li><a href="#" onclick="showDrivers()">Drivers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Customer Service</h4>
+                    <ul>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="#">Returns</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 F1 Store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script src="products.js"></script>
+    <script src="script.js"></script>
+    
+    <script>
+        // Product Detail Page JavaScript
+        let currentProduct = null;
+        let selectedSize = null;
+        let selectedColor = null;
+
+        // Load product details when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProductDetail();
+        });
+
+        function loadProductDetail() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+            
+            if (!productId) {
+                window.location.href = 'products.html';
+                return;
+            }
+            
+            currentProduct = getProductById(parseInt(productId));
+            
+            if (!currentProduct) {
+                showNotification('Product not found', 'error');
+                setTimeout(() => {
+                    window.location.href = 'products.html';
+                }, 2000);
+                return;
+            }
+            
+            displayProductDetail();
+            loadRelatedProducts();
+            updateBreadcrumb();
+        }
+
+        function displayProductDetail() {
+            const container = document.getElementById('productDetailContainer');
+            
+            const originalPriceHTML = currentProduct.originalPrice ? 
+                `<span class="original-price" style="text-decoration: line-through; color: #999; margin-left: 1rem; font-size: 1.5rem;">$${currentProduct.originalPrice.toFixed(2)}</span>` : '';
+            
+            const badgeHTML = currentProduct.badge ? 
+                `<div class="product-badge ${currentProduct.badge}" style="position: static; margin-bottom: 1rem; display: inline-block;">${currentProduct.badge.toUpperCase()}</div>` : '';
+            
+            // Set default selections
+            selectedSize = currentProduct.sizes ? currentProduct.sizes[0] : null;
+            selectedColor = currentProduct.colors ? currentProduct.colors[0] : null;
+            
+            container.innerHTML = `
+                <div class="product-images">
+                    <div class="main-image" id="mainImage">${currentProduct.image}</div>
+                    <div class="thumbnail-images">
+                        <div class="thumbnail active" onclick="changeMainImage('${currentProduct.image}')">${currentProduct.image}</div>
+                        <div class="thumbnail" onclick="changeMainImage('🏎️')">🏎️</div>
+                        <div class="thumbnail" onclick="changeMainImage('🏁')">🏁</div>
+                    </div>
+                </div>
+                
+                <div class="product-details">
+                    ${badgeHTML}
+                    <h1>${currentProduct.name}</h1>
+                    <div class="product-price-detail">
+                        ${formatPrice(currentProduct.price)}
+                        ${originalPriceHTML}
+                    </div>
+                    
+                    <div class="product-rating">
+                        <span class="stars">${generateStarRating(currentProduct.rating)}</span>
+                        <span class="rating-text">${currentProduct.rating} (${currentProduct.reviews} reviews)</span>
+                    </div>
+                    
+                    <div class="product-description">
+                        <p>${currentProduct.description}</p>
+                    </div>
+                    
+                    <div class="product-options">
+                        ${currentProduct.sizes && currentProduct.sizes.length > 1 ? `
+                            <div class="option-group">
+                                <label>Size:</label>
+                                <div class="size-options">
+                                    ${currentProduct.sizes.map(size => `
+                                        <div class="size-option ${size === selectedSize ? 'selected' : ''}" 
+                                             onclick="selectSize('${size}')">${size}</div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${currentProduct.colors && currentProduct.colors.length > 1 ? `
+                            <div class="option-group">
+                                <label>Color:</label>
+                                <div class="color-options">
+                                    ${currentProduct.colors.map(color => `
+                                        <div class="color-option ${color === selectedColor ? 'selected' : ''}" 
+                                             onclick="selectColor('${color}')">${color}</div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="product-actions">
+                        <button class="add-to-cart-detail" onclick="addProductToCart()">
+                            ADD TO CART - ${formatPrice(currentProduct.price)}
+                        </button>
+                    </div>
+                    
+                    <div class="product-info-tabs">
+                        <div class="tab-buttons">
+                            <button class="tab-btn active" onclick="showTab('details')">Details</button>
+                            <button class="tab-btn" onclick="showTab('shipping')">Shipping</button>
+                            <button class="tab-btn" onclick="showTab('returns')">Returns</button>
+                        </div>
+                        
+                        <div class="tab-content">
+                            <div class="tab-panel active" id="details-tab">
+                                <h4>Product Details</h4>
+                                <ul>
+                                    <li>Official Formula 1 merchandise</li>
+                                    <li>Premium quality materials</li>
+                                    <li>Authentic team branding</li>
+                                    <li>Available in multiple sizes and colors</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="tab-panel" id="shipping-tab">
+                                <h4>Shipping Information</h4>
+                                <ul>
+                                    <li>Free shipping on orders over $75</li>
+                                    <li>Standard delivery: 3-5 business days</li>
+                                    <li>Express delivery: 1-2 business days</li>
+                                    <li>International shipping available</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="tab-panel" id="returns-tab">
+                                <h4>Returns & Exchanges</h4>
+                                <ul>
+                                    <li>30-day return policy</li>
+                                    <li>Items must be in original condition</li>
+                                    <li>Free returns on defective items</li>
+                                    <li>Exchange for different size/color available</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function changeMainImage(image) {
+            document.getElementById('mainImage').textContent = image;
+            
+            // Update active thumbnail
+            document.querySelectorAll('.thumbnail').forEach(thumb => {
+                thumb.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function selectSize(size) {
+            selectedSize = size;
+            
+            // Update UI
+            document.querySelectorAll('.size-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+        }
+
+        function selectColor(color) {
+            selectedColor = color;
+            
+            // Update UI
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+        }
+
+        function addProductToCart() {
+            if (!currentProduct) return;
+            
+            addToCart(currentProduct.id, 1, selectedSize, selectedColor);
+        }
+
+        function loadRelatedProducts() {
+            const relatedContainer = document.getElementById('relatedProducts');
+            
+            // Get products from same category, excluding current product
+            const relatedProducts = products
+                .filter(p => p.category === currentProduct.category && p.id !== currentProduct.id)
+                .slice(0, 4);
+            
+            if (relatedProducts.length === 0) {
+                relatedContainer.innerHTML = '<p style="text-align: center; color: #666;">No related products found.</p>';
+                return;
+            }
+            
+            relatedContainer.innerHTML = relatedProducts
+                .map(product => createProductCard(product))
+                .join('');
+        }
+
+        function updateBreadcrumb() {
+            const breadcrumb = document.getElementById('productBreadcrumb');
+            if (breadcrumb && currentProduct) {
+                breadcrumb.textContent = currentProduct.name;
+            }
+        }
+
+        function showTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update tab panels
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+    </script>
+    
+    <style>
+        /* Product Detail Page Specific Styles */
+        .breadcrumb {
+            background: #f8f9fa;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .breadcrumb a {
+            color: var(--f1-red);
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .breadcrumb span {
+            color: #666;
+        }
+        
+        .main-content {
+            padding: 2rem 0;
+        }
+        
+        .related-products {
+            margin-top: 4rem;
+            padding-top: 3rem;
+            border-top: 2px solid #e0e0e0;
+        }
+        
+        .product-info-tabs {
+            margin-top: 2rem;
+            border-top: 1px solid #e0e0e0;
+            padding-top: 2rem;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .tab-btn {
+            background: none;
+            border: 2px solid var(--f1-black);
+            color: var(--f1-black);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        
+        .tab-btn:hover, .tab-btn.active {
+            background: var(--f1-red);
+            border-color: var(--f1-red);
+            color: var(--f1-white);
+        }
+        
+        .tab-panel {
+            display: none;
+        }
+        
+        .tab-panel.active {
+            display: block;
+        }
+        
+        .tab-panel h4 {
+            margin-bottom: 1rem;
+            color: var(--f1-black);
+        }
+        
+        .tab-panel ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .tab-panel li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .tab-panel li:before {
+            content: '✓';
+            color: var(--f1-red);
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+        
+        .original-price {
+            text-decoration: line-through;
+            color: #999;
+            margin-left: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .tab-buttons {
+                flex-wrap: wrap;
+            }
+            
+            .tab-btn {
+                flex: 1;
+                min-width: 100px;
+            }
+        }
+    </style>
+</body>
+</html>

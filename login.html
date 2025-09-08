@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - F1 Store</title>
+    <meta name="description" content="Sign in to your F1 Store account to access your orders and preferences.">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎️</text></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1 class="logo"><a href="index.html" style="color: inherit; text-decoration: none;">F1 STORE</a></h1>
+            </div>
+            <nav class="nav">
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="#" onclick="showTeams()">Teams</a></li>
+                    <li><a href="#" onclick="showDrivers()">Drivers</a></li>
+                </ul>
+            </nav>
+            <div class="nav-actions">
+                <div class="search-box">
+                    <input type="text" placeholder="Search products..." id="searchInput">
+                    <button onclick="searchProducts()">🔍</button>
+                </div>
+                <div class="user-menu">
+                    <button onclick="toggleUserMenu()" id="userBtn">👤</button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="login.html">Sign In</a>
+                        <a href="signup.html">Sign Up</a>
+                        <a href="#" onclick="showOrders()">My Orders</a>
+                    </div>
+                </div>
+                <div class="cart-icon" onclick="openCart()">
+                    🛒 <span class="cart-count" id="cartCount">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Login Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="auth-layout">
+                <div class="auth-container">
+                    <div class="auth-header">
+                        <h1>SIGN IN</h1>
+                        <p>Welcome back to F1 Store</p>
+                    </div>
+
+                    <form class="auth-form" id="loginForm" onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" required>
+                        </div>
+
+                        <div class="form-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="rememberMe">
+                                <span class="checkmark"></span>
+                                Remember me
+                            </label>
+                            <a href="#" onclick="showForgotPassword()" class="forgot-link">Forgot Password?</a>
+                        </div>
+
+                        <button type="submit" class="btn auth-btn" id="loginBtn">
+                            SIGN IN
+                        </button>
+                    </form>
+
+                    <div class="auth-divider">
+                        <span>OR</span>
+                    </div>
+
+                    <div id="g_id_signin"></div>
+
+                    <div class="auth-footer">
+                        <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+                    </div>
+                </div>
+
+                <div class="auth-banner">
+                    <div class="banner-content">
+                        <h2>JOIN THE F1 COMMUNITY</h2>
+                        <p>Get exclusive access to:</p>
+                        <ul>
+                            <li>✓ Early access to new collections</li>
+                            <li>✓ Member-only discounts</li>
+                            <li>✓ Order tracking and history</li>
+                            <li>✓ Personalized recommendations</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal" id="forgotPasswordModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideModal('forgotPasswordModal')">&times;</button>
+            <h3>Reset Password</h3>
+            <p>Enter your email address and we'll send you a link to reset your password.</p>
+            <form onsubmit="handleForgotPassword(event)">
+                <div class="form-group">
+                    <label for="resetEmail">Email Address</label>
+                    <input type="email" id="resetEmail" required>
+                </div>
+                <button type="submit" class="btn">Send Reset Link</button>
+            </form>
+        </div>
+    </div>
+
+
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>F1 STORE</h3>
+                    <p>Official Formula 1 merchandise and apparel</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="products.html">Products</a></li>
+                        <li><a href="#" onclick="showTeams()">Teams</a></li>
+                        <li><a href="#" onclick="showDrivers()">Drivers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Customer Service</h4>
+                    <ul>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="#">Returns</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 F1 Store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="products.js"></script>
+    <script src="script.js"></script>
+    
+    <script>
+        // Login Page JavaScript
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            
+            // Validate inputs
+            if (!validateEmail(email)) {
+                showNotification('Please enter a valid email address', 'error');
+                return;
+            }
+            
+            if (!validatePassword(password)) {
+                showNotification('Password must be at least 6 characters', 'error');
+                return;
+            }
+            
+            // Show loading state
+            loginBtn.innerHTML = '<span class="loading"></span> Signing In...';
+            loginBtn.disabled = true;
+            
+            // Simulate API call delay
+            setTimeout(() => {
+                const success = signIn(email, password);
+                
+                // Reset button
+                loginBtn.innerHTML = 'SIGN IN';
+                loginBtn.disabled = false;
+                
+                if (success) {
+                    // Redirect to previous page or home
+                    const returnUrl = new URLSearchParams(window.location.search).get('return') || 'index.html';
+                    setTimeout(() => {
+                        window.location.href = returnUrl;
+                    }, 1000);
+                }
+            }, 1000);
+        }
+
+        // Initialize Google Sign-In when page loads
+        window.addEventListener('load', function() {
+            if (typeof google !== 'undefined') {
+                google.accounts.id.initialize({
+                    client_id: '1026746797800-9kcql648ej1gkq8c538g4g6o0q3i0120.apps.googleusercontent.com',
+                    callback: handleGoogleSignIn
+                });
+                
+                google.accounts.id.renderButton(
+                    document.getElementById('g_id_signin'),
+                    {
+                        theme: 'outline',
+                        size: 'large',
+                        type: 'standard',
+                        shape: 'rectangular',
+                        text: 'signin_with',
+                        logo_alignment: 'left'
+                    }
+                );
+            }
+        });
+        
+        function handleGoogleSignIn(response) {
+            const userInfo = parseJwt(response.credential);
+            
+            if (userInfo) {
+                // Check if user exists, if not create account
+                let user = users.find(u => u.email === userInfo.email);
+                if (!user) {
+                    const userData = {
+                        name: userInfo.name,
+                        email: userInfo.email,
+                        password: 'google_auth',
+                        agreeTerms: true,
+                        newsletter: true
+                    };
+                    signUp(userData);
+                    user = users.find(u => u.email === userInfo.email);
+                }
+                
+                // Sign in user
+                currentUser = user;
+                localStorage.setItem('f1_current_user', JSON.stringify(currentUser));
+                updateUserInterface();
+                
+                showNotification(`Welcome back, ${userInfo.name}!`, 'success');
+                
+                setTimeout(() => {
+                    const returnUrl = new URLSearchParams(window.location.search).get('return') || 'index.html';
+                    window.location.href = returnUrl;
+                }, 1000);
+            }
+        }
+        
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                
+                return JSON.parse(jsonPayload);
+            } catch (error) {
+                console.error('Error parsing JWT:', error);
+                return null;
+            }
+        }
+
+        function showForgotPassword() {
+            showModal('forgotPasswordModal');
+        }
+
+        function handleForgotPassword(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('resetEmail').value;
+            
+            if (!validateEmail(email)) {
+                showNotification('Please enter a valid email address', 'error');
+                return;
+            }
+            
+            // Simulate sending reset email
+            showNotification('Password reset link sent to your email!', 'success');
+            hideModal('forgotPasswordModal');
+            
+            // Clear form
+            document.getElementById('resetEmail').value = '';
+        }
+
+        // Check if user is already logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            if (currentUser) {
+                // User is already logged in, redirect to home
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+    
+    <style>
+        /* Auth Page Specific Styles */
+        .main-content {
+            min-height: 80vh;
+            padding: 2rem 0;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        
+        .auth-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .auth-container {
+            background: var(--f1-white);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .auth-header h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--f1-black);
+            margin-bottom: 0.5rem;
+        }
+        
+        .auth-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .auth-form {
+            margin-bottom: 2rem;
+        }
+        
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+        
+        .forgot-link {
+            color: var(--f1-red);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+        
+        .auth-btn {
+            width: 100%;
+            background: var(--f1-red);
+            color: var(--f1-white);
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+        
+        .auth-btn:hover {
+            background: #c10500;
+        }
+        
+        .auth-divider {
+            text-align: center;
+            margin: 2rem 0;
+            position: relative;
+        }
+        
+        .auth-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e0e0e0;
+        }
+        
+        .auth-divider span {
+            background: var(--f1-white);
+            padding: 0 1rem;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .google-btn {
+            width: 100%;
+            background: var(--f1-white);
+            color: var(--f1-black);
+            border: 2px solid #e0e0e0;
+            padding: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .google-btn:hover {
+            background: #f8f9fa;
+            border-color: var(--f1-red);
+        }
+        
+        .google-icon {
+            font-size: 1.2rem;
+        }
+        
+        .auth-footer {
+            text-align: center;
+        }
+        
+        .auth-footer a {
+            color: var(--f1-red);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .auth-banner {
+            background: linear-gradient(135deg, var(--f1-black) 0%, var(--f1-red) 100%);
+            color: var(--f1-white);
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+        }
+        
+        .banner-content h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .banner-content p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.9;
+        }
+        
+        .banner-content ul {
+            list-style: none;
+            text-align: left;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        .banner-content li {
+            padding: 0.5rem 0;
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .demo-google-form {
+            padding: 1rem 0;
+        }
+        
+        .demo-google-form select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .auth-layout {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .auth-container {
+                padding: 2rem;
+            }
+            
+            .auth-header h1 {
+                font-size: 2rem;
+            }
+            
+            .banner-content h2 {
+                font-size: 1.5rem;
+            }
+            
+            .form-options {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 1.5rem;
+                margin: 0 1rem;
+            }
+            
+            .auth-banner {
+                padding: 2rem;
+                margin: 0 1rem;
+            }
+        }
+    </style>
+</body>
+</html>
